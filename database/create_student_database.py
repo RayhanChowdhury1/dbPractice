@@ -4,7 +4,7 @@ conn = sqlite3.connect('students.sqlite')
 cursor = conn.cursor()
 
 create_students_table = """
-CREATE TABLE IF NOT EXISTS students (
+CREATE TABLE students (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 firstname TEXT NOT NULL,
 lastname TEXT NOT NULL,
