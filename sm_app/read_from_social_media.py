@@ -30,14 +30,14 @@ with sqlite3.connect("sm.sqlite") as conn:
     # for users_post in users_posts:
     #     print(users_post)
 
-    select_post_comments_users= """
-    SELECT posts.description as post, comments.text as comment, name
-    FROM posts
-    JOIN comments ON posts.id = comments.post_id
-    JOIN users ON users.id = comments.user_id
-    """
-
-    posts_comments_user = execute_read_query(conn, select_post_comments_users)
-
-    for posts_comments_user in posts_comments_user:
-        print(posts_comments_user)
+    # select_post_comments_users= """
+    # SELECT posts.description as post, comments.text as comment, name
+    # FROM posts
+    # JOIN comments ON posts.id = comments.post_id
+    # JOIN users ON users.id = comments.user_id
+    # """
+    #
+    # posts_comments_user = execute_read_query(conn, select_post_comments_users)
+    #
+    # for posts_comments_user in posts_comments_user:
+    #     print(posts_comments_user)
