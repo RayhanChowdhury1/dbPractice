@@ -36,4 +36,14 @@ class Post(Base):
     def __repr__(self) -> str:
         return f'{self.title}'
 
+class Comment(Base):
+    __tablename__ = 'comments'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, autoincrement=True)
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('users.id'))
+    post_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('posts.id'))
+    comment: so.Mapped[str]
+    post: so.Mapped['Post'] = so.relationship(back_populates='comments')
+    user: so.Mapped['User'] = so.relationship(back_populates='comments_made')
 
+    def __repr__(self):
+        return f"Comment(user_id={self.user_id}, post_id={self.post_id}, comment='{self.comment}')"
