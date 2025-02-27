@@ -1,40 +1,45 @@
-from typing import Optional
 import sqlalchemy as sa
 import sqlalchemy.orm as so
+from sqlalchemy.orm import Mapped
 
-class Base(so.DeclarativeBase):
-    pass
+Base = so.declarative_base()
 
-likes = sa.Table("likes",
-                             Base.metadata,
-                             sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
-                             sa.Column("user_id", sa.ForeignKey("users.id", )),
-                             sa.Column("post_id", sa.ForeignKey("posts.id"), ),
-                             sa.UniqueConstraint("user_id", "post_id")
-                             )
+# Define the likes table as a secondary table
+likes_table = sa.Table(
+    'likes',
+    Base.metadata,
+    sa.Column('id', sa.Integer, primary_key=True),
+    sa.Column('user_id', sa.Integer, sa.ForeignKey('users.id'), nullable=False),
+    sa.Column('post_id', sa.Integer, sa.ForeignKey('posts.id'), nullable=False),
+)
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = 'users'
     id: so.Mapped[int] = so.mapped_column(primary_key=True, autoincrement=True)
     name: so.Mapped[str] = so.mapped_column(unique=True)
-    age: so.Mapped[int] = so.mapped_column()
-    gender: so.Mapped[str] = so.mapped_column()
-    nationality: so.Mapped[str] = so.mapped_column()
+    age: so.Mapped[int|None]
+    gender: so.Mapped[str|None]
+    nationality: so.Mapped[str|None]
+    posts: so.Mapped[list['Post']] = so.relationship(back_populates='user')
+    liked_posts: so.Mapped[list['Post']] = so.relationship(secondary=likes_table, back_populates='liked_by_users')
+    comments_made: so.Mapped[list['Comment']] = so.relationship(back_populates='user')
 
-
-    def __repr__(self) -> str:
-        return f"User {self.name}"
+    def __repr__(self):
+        return f"User(name='{self.name}', age={self.age}, gender='{self.gender}', nationality='{self.nationality}')"
 
 class Post(Base):
     __tablename__ = 'posts'
     id: so.Mapped[int] = so.mapped_column(primary_key=True, autoincrement=True)
-    title: so.Mapped[str] = so.mapped_column()
-    description: so.Mapped[str] = so.mapped_column()
-    user: so.Mapped[list["User"]] = so.relationship('User',back_populates='posts')
-    user_id: so.Mapped[list[User]]= so.mapped_column(sa.ForeignKey("users.id"))
+    title: so.Mapped[str]
+    description: so.Mapped[str]
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('users.id'))
+    user: so.Mapped["User"] = so.relationship(back_populates='posts')
+    liked_by_users: so.Mapped[list["User"]] = so.relationship(secondary=likes_table,
+                                                              back_populates='liked_posts')
+    comments: so.Mapped[list["Comment"]] = so.relationship(back_populates='post')
 
-    def __repr__(self) -> str:
-        return f'{self.title}'
+    def __repr__(self):
+        return f"Post(title='{self.title}', description='{self.description}', user_id={self.user_id})"
 
 class Comment(Base):
     __tablename__ = 'comments'
