@@ -39,12 +39,20 @@ class Controller:
                           for post in user.posts]
         return posts_info
 
-    def create_post(self, title: str, description: str):
+    def create_post(self,title,description):
         with so.Session(bind=self.engine) as session:
-            user = session.scalars(sa.select(User).where(User.name == current_user)).one_or_none()
+            user = session.merge(self.current_user)
             post=Post(title=title, description=description, user=user)
             session.add(post)
             session.commit()
+
+    def like_post(self,post):
+        with so.Session(bind=self.engine) as session:
+            user = session.merge(self.current_user)
+            user.liked_posts.append(post)
+            session.commit()
+
+#   def like_post(self, ):
 class CLI:
     def __init__(self):
         self.controller = Controller()
@@ -92,7 +100,8 @@ class CLI:
         self.show_posts(self.controller.current_user.name)
 
         menu_items = {'Show posts from another user': self.show_posts,
-                      'Logout': self.login}
+                      'Logout': self.login,
+                      'Create a post': self.make_post,}
 
         menu_choice = pyip.inputMenu(list(menu_items.keys()),
                                      prompt='Select an action\n',
@@ -117,10 +126,17 @@ class CLI:
             print(f'Title: {post["title"]}')
             print(f'Content: {post["description"]}')
             print(f'Likes: {post["number_likes"]}')
-
+        # like = input(('Like current post? [Y/N]:'))4
+        # if like == 'Y':
+        #     self.controller.like_post(post)
         if not posts:
             print('No Posts')
 
+    def make_post(self):
+        title = input('Enter title: ')
+        description = input('Enter description: ')
+        self.controller.create_post(title, description)
 
-# cli = CLI()
+
+cli = CLI()
 controller = Controller()
