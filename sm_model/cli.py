@@ -5,7 +5,6 @@ from sqlalchemy.sql.functions import current_user
 from models import User, Post, Comment
 import pyinputplus as pyip
 
-
 class Controller:
     def __init__(self, db_location='sqlite:///social_media.db'):
         self.current_user = None
@@ -35,6 +34,7 @@ class Controller:
                            'title': post.title,
                            'description': post.description,
                            'number_likes': len(post.liked_by_users),
+                           'comments': [{comment.user.name:comment.comment} for comment in post.comments]
                            }
                           for post in user.posts]
         return posts_info
@@ -46,13 +46,25 @@ class Controller:
             session.add(post)
             session.commit()
 
-    def like_post(self,post):
+    def like_post(self,post_id):
         with so.Session(bind=self.engine) as session:
             user = session.merge(self.current_user)
-            user.liked_posts.append(post)
+            post = session.get(Post, post_id)
+            if post in user.liked_posts:
+                if input("You have already liked this post. Remove like [Y/N]") == "Y":
+                     user.liked_posts.remove(post)
+            else:
+                user.liked_posts.append(post)
             session.commit()
 
-#   def like_post(self, ):
+    def make_comment(self, post_id, text):
+        with so.Session(bind=self.engine) as session:
+            user = session.merge(self.current_user)
+            post = session.get(Post, post_id)
+            comment=Comment(post=post, user=user, comment=text)
+            session.add(comment)
+            session.commit()
+
 class CLI:
     def __init__(self):
         self.controller = Controller()
@@ -126,9 +138,13 @@ class CLI:
             print(f'Title: {post["title"]}')
             print(f'Content: {post["description"]}')
             print(f'Likes: {post["number_likes"]}')
-        # like = input(('Like current post? [Y/N]:'))4
-        # if like == 'Y':
-        #     self.controller.like_post(post)
+            print(f'Comments: {post["comments"]}')
+            like = input(('Like current post? [Y/N]:'))
+            if like == 'Y':
+              self.controller.like_post(post["id"])
+            if input("Would you like to make a comment? [Y/N]:")=="Y":
+                text = input("Input text:")
+                self.controller.make_comment(post["id"], text)
         if not posts:
             print('No Posts')
 
