@@ -48,11 +48,18 @@ class Controller:
 
     def like_post(self,post_id):
         with so.Session(bind=self.engine) as session:
+            validInput= False
             user = session.merge(self.current_user)
             post = session.get(Post, post_id)
             if post in user.liked_posts:
-                if input("You have already liked this post. Remove like [Y/N]") == "Y":
-                     user.liked_posts.remove(post)
+                while not validInput:
+                    if input("You have already liked this post. Remove like [Y/N]").upper() == "Y":
+                        user.liked_posts.remove(post)
+                        validInput= True
+                    elif input("You have already liked this post. Remove like [Y/N]").upper() == "N":
+                        validInput = True
+                    else:
+                        print("Invalid choice")
             else:
                 user.liked_posts.append(post)
             session.commit()
