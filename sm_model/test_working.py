@@ -27,4 +27,9 @@ class TestDatabase:
         db_session.commit()
         qry = sa.select([User]).where(User.name == "Rayhan")
         rayhan = db_session.scalar(qry)
+        assert rayhan is not None
+        assert rayhan.name == "Rayhan"
+        assert rayhan.age ==20
+        assert rayhan.gender == "male"
+        assert rayhan.nationality is None
 
