@@ -145,10 +145,21 @@ class CLI:
             print(f'Title: {post["title"]}')
             print(f'Content: {post["description"]}')
             print(f'Likes: {post["number_likes"]}')
-            print(f'Comments: {post["comments"]}')
+            #print(f'Comments: {post["comments"]}')
+            print("Comments:")
+            for comment in post["comments"]:
+                for key,value in comment.items():
+                    print(f'         {key}: {value}')
+            validInput = False
             like = input(('Like current post? [Y/N]:'))
-            if like == 'Y':
-              self.controller.like_post(post["id"])
+            while not validInput:
+                if like == 'Y':
+                    self.controller.like_post(post["id"])
+                    validInput = True
+                elif like == 'N':
+                    validInput = False
+                else:
+                    print("Invalid input")
             if input("Would you like to make a comment? [Y/N]:")=="Y":
                 text = input("Input text:")
                 self.controller.make_comment(post["id"], text)
@@ -160,6 +171,6 @@ class CLI:
         description = input('Enter description: ')
         self.controller.create_post(title, description)
 
-
-cli = CLI()
-controller = Controller()
+if __name__ == '__main__':
+    cli = CLI()
+    controller = Controller()

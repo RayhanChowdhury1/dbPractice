@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
-from models import User, Post, Comment
+from sm_model.models import User, Post, Comment
 import pyinputplus as pyip
 
 class Controller:
@@ -28,6 +28,5 @@ class Controller:
                           for post in user.posts]
         return posts_info
 
-c=Controller()
-print(c.get_posts('Diana'))
+
 
